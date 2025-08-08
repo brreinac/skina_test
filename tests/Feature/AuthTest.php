@@ -8,13 +8,9 @@ use Tests\TestCase;
 
 class AuthTest extends TestCase
 {
-    /**
-     * A basic feature test example.
-     */
-    public function test_example(): void
-    {
-        $response = $this->get('/');
-
-        $response->assertStatus(200);
+    public function test_login_active_user() {
+        $user = User::factory()->create(['username'=>'u','password'=>bcrypt('pw'),'is_active'=>true]);
+        $response = $this->postJson('/api/login',['username'=>'u','password'=>'pw']);
+        $response->assertStatus(200)->assertJsonStructure(['id','username']);
     }
 }
