@@ -8,42 +8,23 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    // Note: Sanctum exposes /sanctum/csrf-cookie route, so no need to implement CSRF route manually.
-    // We'll provide login, logout and user endpoints.
-
-    public function login(Request $request)
-    {
-        $request->validate([
-            'username' => 'required|string',
-            'password' => 'required|string',
-        ]);
-
-        $credentials = [
-            'username' => $request->username,
-            'password' => $request->password,
-            'is_active' => true,
-        ];
-
-        if (! Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Credenciales inválidas o usuario inactivo'], 401);
+    // Login via username + password (uses session cookie provided by Sanctum)
+    public function login(Request $r) {
+        $r->validate(['username'=>'required','password'=>'required']);
+        if (!Auth::attempt(['username'=>$r->username,'password'=>$r->password,'is_active'=>true])) {
+            return response()->json(['message'=>'Credenciales inválidas'],401);
         }
-
-        // Regenerate session to prevent fixation
-        $request->session()->regenerate();
-
+        $r->session()->regenerate();
         return response()->json(Auth::user());
     }
 
-    public function logout(Request $request)
-    {
+    public function logout(Request $r) {
         Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-        return response()->json(['message' => 'Sesión finalizada']);
+        $r->session()->invalidate();
+        $r->session()->regenerateToken();
+        return response()->json(['message'=>'ok']);
     }
-
-    public function user(Request $request)
-    {
-        return response()->json($request->user());
+    public function user(Request $r) {
+        return response()->json($r->user());
     }
 }
