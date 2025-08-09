@@ -1,0 +1,17 @@
+<div class="container mt-4">
+  <h2>{{ id ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
+
+  <div class="mb-3">
+    <label>Nombre</label>
+    <input type="text" class="form-control" [(ngModel)]="nombre" />
+  </div>
+
+  <div class="mb-3">
+    <label>
+      <input type="checkbox" [(ngModel)]="estado" /> Activa
+    </label>
+  </div>
+
+  <button class="btn btn-success" (click)="save()">Guardar</button>
+  <button class="btn btn-secondary" (click)="router.navigate(['/categories'])">Cancelar</button>
+</div>

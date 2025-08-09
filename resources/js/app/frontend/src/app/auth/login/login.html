@@ -1,1 +1,16 @@
-<p>login works!</p>
+<div class="container py-5" style="max-width:420px;">
+  <h3 class="mb-4">Iniciar sesión</h3>
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div class="mb-3">
+    <label>Usuario</label>
+    <input type="text" class="form-control" [(ngModel)]="username" />
+  </div>
+
+  <div class="mb-3">
+    <label>Contraseña</label>
+    <input type="password" class="form-control" [(ngModel)]="password" />
+  </div>
+
+  <button class="btn w-100" style="background:#ed8404;color:#fff;" (click)="submit()">Entrar</button>
+</div>
