@@ -1,1 +1,95 @@
-<p>dashboard works!</p>
+<!-- dashboard.html -->
+<div class="container py-4" style="background: #ffffff;">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Dashboard</h2>
+    <div>
+      <button class="btn btn-sm" (click)="load()" [disabled]="loading" style="background:#ed8404;color:white">Actualizar</button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
+
+  <div *ngIf="loading" class="text-center py-4">
+    <div class="spinner-border" role="status"><span class="visually-hidden">Cargando...</span></div>
+  </div>
+
+  <div *ngIf="!loading">
+    <!-- Cards -->
+    <div class="row mb-4">
+      <div class="col-sm-6 col-md-3 mb-2" *ngFor="let key of ['users','categories','subcategories','products']">
+        <div class="card shadow-sm h-100">
+          <div class="card-body">
+            <h6 class="card-title text-uppercase" style="color:#4169e1; text-decoration: underline;">
+              {{ key === 'users' ? 'Usuarios' : key === 'categories' ? 'Categorías' : key === 'subcategories' ? 'Subcategorías' : 'Productos' }}
+            </h6>
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <h3>{{ stats.counts[key] }}</h3>
+                <a [routerLink]="['/', key === 'users' ? 'users' : key === 'categories' ? 'categories' : key === 'subcategories' ? 'subcategories' : 'products']"
+                   class="small" style="color:#ed8404; text-decoration:none;">Ver detalle</a>
+              </div>
+              <div>
+                <i class="bi bi-box-seam" style="font-size:28px;opacity:0.2"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent products -->
+    <div class="row">
+      <div class="col-md-8">
+        <div class="card mb-3">
+          <div class="card-header">
+            <strong>Últimos productos</strong>
+          </div>
+          <div class="card-body p-0">
+            <table class="table mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Nombre</th>
+                  <th>Subcategorías</th>
+                  <th>Creado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let p of stats.recent_products">
+                  <td>{{ p.nombre }}</td>
+                  <td>
+                    <span *ngFor="let s of p.subcategories; let i = index">
+                      {{ s.nombre }}<span *ngIf="i < p.subcategories.length-1">, </span>
+                    </span>
+                  </td>
+                  <td>{{ p.created_at | date:'short' }}</td>
+                </tr>
+                <tr *ngIf="stats.recent_products.length === 0">
+                  <td colspan="3" class="text-center text-muted">No hay productos recientes</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card mb-3">
+          <div class="card-header">
+            Accesos rápidos
+          </div>
+          <div class="card-body">
+            <div class="d-grid gap-2">
+              <a class="btn" [routerLink]="['/categories']" style="background:#ed8404;color:white">Categorías</a>
+              <a class="btn" [routerLink]="['/subcategories']" style="background:#ed8404;color:white">Subcategorías</a>
+              <a class="btn" [routerLink]="['/products']" style="background:#ed8404;color:white">Productos</a>
+              <a *ngIf="isAdmin()" class="btn" [routerLink]="['/users']" style="background:#ed8404;color:white">Usuarios</a>
+            </div>
+          </div>
+          <div class="card-footer small text-muted">
+            Última actualización: {{ stats.generated_at | date:'short' }}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
