@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './auth/login/login';
-import { Dashboard  } from './dashboard/dashboard';
+import { DashboardComponent } from './dashboard/dashboard';
 import { CategoriesListComponent } from './categories/list/list';
 import { CategoryFormComponent } from './categories/form/form';
 import { SubcategoriesListComponent } from './subcategories/list/list';
@@ -15,8 +15,9 @@ import { adminGuard } from './guards/admin-guard';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: Dashboard , canActivate: [authGuard] },
-
+  { path: 'dashboard', component: DashboardComponent , canActivate: [authGuard] },
+  { path: '', component: DashboardComponent },
+  { path: 'dashboard', component: DashboardComponent },
   { path: 'categories', component: CategoriesListComponent, canActivate: [authGuard] },
   { path: 'categories/new', component: CategoryFormComponent, canActivate: [authGuard, adminGuard] },
   { path: 'categories/edit/:id', component: CategoryFormComponent, canActivate: [authGuard, adminGuard] },

@@ -1,0 +1,6 @@
+/* dashboard.css */
+.container { background: #ffffff; }
+.card-title { font-size: 0.85rem; }
+a.small { color: #ed8404; }
+a.small:hover { text-decoration: underline; color: #ed8404; }
+.btn { border-radius: 6px; }
