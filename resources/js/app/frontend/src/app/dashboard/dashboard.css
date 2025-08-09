@@ -1,6 +1,35 @@
-/* dashboard.css */
-.container { background: #ffffff; }
-.card-title { font-size: 0.85rem; }
-a.small { color: #ed8404; }
-a.small:hover { text-decoration: underline; color: #ed8404; }
-.btn { border-radius: 6px; }
+/* src/app/dashboard/dashboard.css */
+
+/* Paleta solicitada */
+:root{
+  --primary-orange: #ed8404; /* botones/enlaces */
+  --primary-blue: #4169e1;   /* subrayado */
+  --bg-white: #ffffff;
+}
+
+/* Layout */
+.d-flex > aside.sidebar{
+  width: 220px;
+  min-height: calc(100vh - 56px); /* menos navbar */
+  background: var(--bg-white);
+}
+
+/* Sidebar links */
+.sidebar .nav-link{
+  color: #333;
+  border-radius: 6px;
+  padding: 10px;
+}
+.sidebar .nav-link.active{
+  background: linear-gradient(90deg, rgba(237,132,4,0.12), rgba(65,105,225,0.06));
+  color: var(--primary-orange);
+}
+
+/* Small visual tweaks */
+.card-header { background: #f8f9fa; }
+.btn-primary { background: var(--primary-orange); border-color: var(--primary-orange); }
+a { color: var(--primary-orange); }
+a:hover { text-decoration: underline; color: var(--primary-blue); }
+
+/* Table tweaks */
+.table thead th { font-weight: 600; }
