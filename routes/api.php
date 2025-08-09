@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+<<<<<<< HEAD
 
 Route::middleware(['auth:sanctum','check.user.active'])->group(function(){
   Route::apiResource('categories', \App\Http\Controllers\Api\CategoryController::class);
@@ -40,3 +41,7 @@ Route::middleware(['auth:sanctum','check.user.active'])->group(function(){
   // Allow basic users to see users/:id update own account - create route for profile update and protect accordingly
   Route::put('profile', [\App\Http\Controllers\Api\UserController::class,'updateProfile']);
 });
+=======
+Route::middleware(['auth:sanctum', 'check.user.active'])
+    ->get('/dashboard/stats', [DashboardController::class, 'stats']);
+>>>>>>> feature/backend
