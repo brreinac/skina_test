@@ -24,7 +24,7 @@ class DashboardController extends Controller
             $recentProducts = Product::with('subcategories')
                 ->latest()
                 ->take(5)
-                ->get(['id','nombre','created_at']);
+                ->get(['id','name','created_at']);
 
             return [
                 'counts' => [

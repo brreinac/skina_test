@@ -55,10 +55,10 @@
               </thead>
               <tbody>
                 <tr *ngFor="let p of stats.recent_products">
-                  <td>{{ p.nombre }}</td>
+                  <td>{{ p.name }}</td>
                   <td>
                     <span *ngFor="let s of p.subcategories; let i = index">
-                      {{ s.nombre }}<span *ngIf="i < p.subcategories.length-1">, </span>
+                      {{ s.name }}<span *ngIf="i < p.subcategories.length-1">, </span>
                     </span>
                   </td>
                   <td>{{ p.created_at | date:'short' }}</td>
