@@ -22,3 +22,6 @@ Route::get('/user',[AuthController::class,'user'])->middleware('auth:sanctum');
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::middleware(['auth:sanctum', 'check.user.active'])
+    ->get('/dashboard/stats', [DashboardController::class, 'stats']);
