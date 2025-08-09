@@ -1,43 +1,32 @@
 // src/app/dashboard/dashboard.ts
-import { Component, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { DashboardService } from '../services/dashboard';
-import { AuthService } from '../services/auth';
-import { NgIf, NgFor } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule, NgbModule],
   templateUrl: './dashboard.html',
   styleUrls: ['./dashboard.css']
 })
-export class DashboardComponent {
-  private dashboardService = inject(DashboardService);
-  public auth = inject(AuthService);
+export class DashboardComponent implements OnInit {
+  counts: any = { users: 0, categories: 0, subcategories: 0, products: 0 };
+  recent: any[] = [];
 
-  public loading = true;
-  public stats: any = { counts: { users:0, categories:0, subcategories:0, products:0 }, recent_products: [] };
-  public error: string | null = null;
+  constructor(private http: HttpClient) {}
 
-  constructor() {
-    this.load();
-  }
-
-  async load() {
-    this.loading = true;
-    this.error = null;
+  async ngOnInit() {
     try {
-      this.stats = await this.dashboardService.stats();
-    } catch (err:any) {
-      console.error(err);
-      this.error = err?.message || 'Error al cargar datos';
-    } finally {
-      this.loading = false;
+      const res: any = await firstValueFrom(this.http.get('/api/dashboard/stats', { withCredentials: true }));
+      this.counts = res.counts ?? this.counts;
+      this.recent = res.recent_products ?? [];
+    } catch (err) {
+      console.error('Error cargando stats:', err);
     }
   }
-
-  isAdmin() { return this.auth.isAdmin(); }
-  isLogged() { return this.auth.isLoggedIn(); }
 }
