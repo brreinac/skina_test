@@ -1,4 +1,4 @@
-// src/app/services/auth.ts
+// resources/js/app/frontend/src/app/services/auth.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, BehaviorSubject } from 'rxjs';
@@ -19,40 +19,49 @@ export class AuthService {
 
   constructor(private http: HttpClient) {}
 
-  // Obtener csrf cookie para Sanctum
+  // --- Obtener csrf cookie para Sanctum ---
   csrf() {
-    return firstValueFrom(this.http.get('/sanctum/csrf-cookie', { withCredentials: true }));
+    return firstValueFrom(
+      this.http.get('/sanctum/csrf-cookie', { withCredentials: true })
+    );
   }
 
-  // Login: solicita CSRF antes y luego llama al endpoint de login
+  // --- Login ---
   async login(username: string, password: string) {
     await this.csrf();
-    const user = await firstValueFrom(this.http.post<AppUser>(`${this.base}/login`, { username, password }, { withCredentials: true }));
+    const user = await firstValueFrom(
+      this.http.post<AppUser>(
+        `${this.base}/login`,
+        { username, password },
+        { withCredentials: true }
+      )
+    );
     this.setUser(user);
     return user;
   }
 
-  // Logout: intenta cerrar sesión en backend y limpia estado local
+  // --- Logout ---
   async logout() {
     try {
-      await firstValueFrom(this.http.post(`${this.base}/logout`, {}, { withCredentials: true }));
+      await firstValueFrom(
+        this.http.post(`${this.base}/logout`, {}, { withCredentials: true })
+      );
     } finally {
       this.clearUser();
     }
   }
 
-  // --- Código recomendado: loadUser() mejorado ---
-  // Llama a /api/user para obtener el usuario actual. Si is_active === false => fuerza logout.
+  // --- Cargar usuario actual ---
   async loadUser() {
     try {
-      const user = await firstValueFrom(this.http.get<AppUser>(`${this.base}/user`, { withCredentials: true }));
+      const user = await firstValueFrom(
+        this.http.get<AppUser>(`${this.base}/user`, { withCredentials: true })
+      );
       if (!user) {
-        // No hay sesión
         this.clearUser();
         throw new Error('No hay sesión activa');
       }
 
-      // Normalizar roles a array
       if (user.roles && !Array.isArray(user.roles)) {
         try {
           user.roles = JSON.parse(String(user.roles));
@@ -61,28 +70,28 @@ export class AuthService {
         }
       }
 
-      // Si el backend indica que el usuario está inactivo -> limpiar y lanzar
       if (user.is_active === false) {
         this.clearUser();
         throw new Error('Usuario inactivo');
       }
 
-      // Guardar user y propagar
       this.setUser(user);
       return user;
     } catch (err) {
-      // En cualquier error (401, 403, red de backend), limpiamos el estado local
       this.clearUser();
       throw err;
     }
   }
 
-  // Helpers para manejar estado local
+  // --- Helpers ---
   setUser(user: AppUser | null) {
     if (user) {
-      // Asegurar roles como array
       if (user.roles && !Array.isArray(user.roles)) {
-        try { user.roles = JSON.parse(String(user.roles)); } catch { user.roles = [String(user.roles)]; }
+        try {
+          user.roles = JSON.parse(String(user.roles));
+        } catch {
+          user.roles = [String(user.roles)];
+        }
       }
       localStorage.setItem('user', JSON.stringify(user));
       this._user$.next(user);
@@ -104,17 +113,24 @@ export class AuthService {
   }
 
   isLoggedIn(): boolean {
-    const u = this.getUser();
-    return !!u;
+    return !!this.getUser();
   }
 
   isAdmin(): boolean {
     const u = this.getUser();
-    return !!u && Array.isArray(u.roles) && (u.roles as string[]).includes('administrador');
+    return (
+      !!u &&
+      Array.isArray(u.roles) &&
+      (u.roles as string[]).includes('administrador')
+    );
   }
 
   isBasic(): boolean {
     const u = this.getUser();
-    return !!u && Array.isArray(u.roles) && (u.roles as string[]).includes('basico');
+    return (
+      !!u &&
+      Array.isArray(u.roles) &&
+      (u.roles as string[]).includes('basico')
+    );
   }
 }

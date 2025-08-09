@@ -2,11 +2,21 @@
   "/api": {
     "target": "http://127.0.0.1:8000",
     "secure": false,
-    "changeOrigin": true
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "cookieDomainRewrite": "localhost",
+    "headers": {
+      "X-Forwarded-Host": "localhost:4200"
+    }
   },
   "/sanctum": {
     "target": "http://127.0.0.1:8000",
     "secure": false,
-    "changeOrigin": true
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "cookieDomainRewrite": "localhost",
+    "headers": {
+      "X-Forwarded-Host": "localhost:4200"
+    }
   }
 }

@@ -1,41 +1,25 @@
 <?php
-
 namespace Database\Seeders;
-
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
-class UsersSeeder extends Seeder
-{
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
-    {
-        // Administrador
-        $admin = User::updateOrCreate(
-            ['email' => 'admin@skinatech.test'],
-            [
-                'username'   => 'admin',
-                'name'       => 'Administrador SkinaTech',
-                'password'   => Hash::make('secret123'), // cámbialo por uno seguro
-                'is_active'  => true,
-            ]
-        );
-        $admin->assignRole('administrador');
+class UsersSeeder extends Seeder {
+  public function run(): void {
+    $adminRole = Role::where('name','administrador')->first();
+    $guestRole = Role::where('name','basico')->first();
 
-        // Invitado
-        $guest = User::updateOrCreate(
-            ['email' => 'guest@skinatech.test'],
-            [
-                'username'   => 'guest',
-                'name'       => 'Invitado SkinaTech',
-                'password'   => Hash::make('guest123'),
-                'is_active'  => true,
-            ]
-        );
-        $guest->assignRole('invitado');
-    }
+    $admin = User::firstOrCreate(
+      ['email' => 'admin@skina.test'],
+      ['username' => 'admin', 'password' => Hash::make('password'), 'is_active' => true, 'name' => 'Admin Skina']
+    );
+    $admin->assignRole($adminRole);
+
+    $guest = User::firstOrCreate(
+      ['email' => 'guest@skina.test'],
+      ['username' => 'invitado', 'password' => Hash::make('password'), 'is_active' => true, 'name' => 'Invitado']
+    );
+    $guest->assignRole($guestRole);
+  }
 }
