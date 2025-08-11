@@ -60,27 +60,26 @@ class UserController extends Controller
         return response()->json($user->load('roles'), 201);
     }
 
-    public function show($id)
-    {
-        $authUser = auth()->user();
-
-        if ($authUser->hasRole('basico') && $authUser->id != $id) {
-            return response()->json(['message' => 'No autorizado para ver otros usuarios'], 403);
-        }
-
-        $user = User::with('roles')->findOrFail($id);
-        return response()->json($user);
-    }
-
-    public function update(Request $request, $id)
+    // ** Corregido: usar route model binding para $user **
+    public function show(User $user, Request $request)
     {
         $authUser = $request->user();
 
-        if ($authUser->hasRole('basico') && $authUser->id != $id) {
-            return response()->json(['message' => 'No autorizado para editar otros usuarios'], 403);
+        if ($authUser->hasRole('basico') && $authUser->id != $user->id) {
+            return response()->json(['message' => 'No autorizado para ver otros usuarios'], 403);
         }
 
-        $user = User::findOrFail($id);
+        return response()->json($user->load('roles'));
+    }
+
+    // ** Corregido: usar route model binding para $user **
+    public function update(Request $request, User $user)
+    {
+        $authUser = $request->user();
+
+        if ($authUser->hasRole('basico') && $authUser->id != $user->id) {
+            return response()->json(['message' => 'No autorizado para editar otros usuarios'], 403);
+        }
 
         $validRoles = Role::pluck('name')->toArray();
 
@@ -117,15 +116,14 @@ class UserController extends Controller
         return response()->json($user->load('roles'));
     }
 
-    public function destroy($id)
+    public function destroy(User $user, Request $request)
     {
-        $authUser = auth()->user();
+        $authUser = $request->user();
 
         if (!$authUser->hasRole('administrador')) {
             return response()->json(['message' => 'No autorizado para eliminar usuarios'], 403);
         }
 
-        $user = User::findOrFail($id);
         $user->delete();
 
         return response()->json(null, 204);

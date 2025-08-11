@@ -26,10 +26,6 @@ Route::middleware(['auth:sanctum', 'check.user.active'])->group(function () {
         Route::apiResource('users', UserController::class);
     });
 
-    // Usuarios básicos pueden ver y editar solo su propio usuario (show y update)
-    Route::get('users/{user}', [UserController::class, 'show'])->middleware('can:view,user');
-    Route::put('users/{user}', [UserController::class, 'update'])->middleware('can:update,user');
-
-    // Ruta para que cualquier usuario actualice su perfil (usuario autenticado)
+    // Perfil propio para todos los usuarios (básicos y admin)
     Route::put('/profile', [UserController::class, 'updateProfile']);
 });
