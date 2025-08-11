@@ -11,21 +11,17 @@ class Category extends Model
 {
     use LogsActivity;
 
-    protected $fillable = ['nombre', 'is_active'];
+    protected $fillable = ['name', 'is_active'];
 
-    /**
-     * Configuración del activity log (obligatorio con versiones recientes del paquete)
-     */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->useLogName('category')
-            ->logOnly(['nombre', 'is_active'])
+            ->logOnly(['name', 'is_active'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
 
-    // Relaciones
     public function subcategories(): HasMany
     {
         return $this->hasMany(Subcategory::class);
@@ -43,17 +39,14 @@ class Category extends Model
         )->distinct();
     }
 
-    // Método para cambiar estado con cascada
     public function setActive(bool $active)
     {
         $this->update(['is_active' => $active]);
 
-        // Cascada a subcategorías
         foreach ($this->subcategories()->get() as $sub) {
             $sub->setActive($active);
         }
 
-        // Actualizar productos asociados
         $productIds = \DB::table('product_subcategory')
             ->whereIn('subcategory_id', $this->subcategories()->pluck('id'))
             ->pluck('product_id')

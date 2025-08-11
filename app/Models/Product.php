@@ -3,23 +3,16 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
-use Spatie\Activitylog\LogOptions;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    use LogsActivity;
+    use HasFactory;
 
-    protected $fillable = ['nombre', 'is_active'];
+    protected $fillable = ['name', 'is_active'];
 
-    public function getActivitylogOptions(): LogOptions
+    public function subcategories()
     {
-        return LogOptions::defaults()
-            ->useLogName('product')
-            ->logOnly(['nombre', 'is_active'])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+        return $this->belongsToMany(Subcategory::class, 'product_subcategory', 'product_id', 'subcategory_id');
     }
-
-    public function subcategories() { return $this->belongsToMany(Subcategory::class, 'product_subcategory'); }
 }

@@ -1,17 +1,40 @@
-<div class="container mt-4">
-  <h2>{{ id ? 'Editar Categoría' : 'Nueva Categoría' }}</h2>
-
-  <div class="mb-3">
-    <label>Nombre</label>
-    <input type="text" class="form-control" [(ngModel)]="nombre" />
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">{{ id ? 'Editar Categoría' : 'Crear Categoría' }}</h5>
   </div>
 
-  <div class="mb-3">
-    <label>
-      <input type="checkbox" [(ngModel)]="estado" /> Activa
-    </label>
-  </div>
+  <div class="card-body">
+    <div class="mb-3">
+      <label class="form-label fw-bold">Nombre</label>
+      <input
+        [(ngModel)]="name"
+        name="name"
+        class="form-control"
+        [disabled]="saving"
+        required
+        maxlength="255"
+        placeholder="Ingrese el nombre de la categoría"
+      />
+    </div>
 
-  <button class="btn btn-success" (click)="save()">Guardar</button>
-  <button class="btn btn-secondary" (click)="router.navigate(['/categories'])">Cancelar</button>
+    <div class="d-flex justify-content-end">
+      <button
+        class="btn btn-success"
+        (click)="save()"
+        [disabled]="saving || !name.trim()"
+      >
+        <span *ngIf="saving" class="spinner-border spinner-border-sm me-1"></span>
+        Guardar
+      </button>
+
+      <button
+        class="btn btn-secondary ms-2"
+        type="button"
+        (click)="cancel()"
+        [disabled]="saving"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
 </div>

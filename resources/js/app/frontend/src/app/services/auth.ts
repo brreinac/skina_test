@@ -1,4 +1,4 @@
-// resources/js/app/frontend/src/app/services/auth.ts
+// src/app/services/auth.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, BehaviorSubject } from 'rxjs';
@@ -6,6 +6,8 @@ import { firstValueFrom, BehaviorSubject } from 'rxjs';
 export type AppUser = {
   id?: number;
   username?: string;
+  name?: string;
+  email?: string;
   roles?: string[] | string;
   is_active?: boolean;
   [k: string]: any;
@@ -17,82 +19,74 @@ export class AuthService {
   private _user$ = new BehaviorSubject<AppUser | null>(null);
   public user$ = this._user$.asObservable();
 
+  // Promise that resolves when initial loadUser call finishes (or null if never called)
+  private _loadedPromise: Promise<AppUser | null> | null = null;
+
   constructor(private http: HttpClient) {}
 
-  // --- Obtener csrf cookie para Sanctum ---
-  csrf() {
-    return firstValueFrom(
-      this.http.get('/sanctum/csrf-cookie', { withCredentials: true })
-    );
+  // ---------- AUTH API ----------
+  async csrf() {
+    return firstValueFrom(this.http.get('/sanctum/csrf-cookie', { withCredentials: true }));
   }
 
-  // --- Login ---
   async login(username: string, password: string) {
     await this.csrf();
-    const user = await firstValueFrom(
-      this.http.post<AppUser>(
-        `${this.base}/login`,
-        { username, password },
-        { withCredentials: true }
-      )
-    );
+    const user = await firstValueFrom(this.http.post<AppUser>(`${this.base}/login`, { username, password }, { withCredentials: true }));
     this.setUser(user);
     return user;
   }
 
-  // --- Logout ---
   async logout() {
     try {
-      await firstValueFrom(
-        this.http.post(`${this.base}/logout`, {}, { withCredentials: true })
-      );
+      await firstValueFrom(this.http.post(`${this.base}/logout`, {}, { withCredentials: true }));
     } finally {
       this.clearUser();
     }
   }
 
-  // --- Cargar usuario actual ---
-  async loadUser() {
-    try {
-      const user = await firstValueFrom(
-        this.http.get<AppUser>(`${this.base}/user`, { withCredentials: true })
-      );
-      if (!user) {
-        this.clearUser();
-        throw new Error('No hay sesión activa');
-      }
-
-      if (user.roles && !Array.isArray(user.roles)) {
+  // loadUser: obtiene /api/user y normaliza roles; retorna user o lanza.
+  loadUser(): Promise<AppUser | null> {
+    if (!this._loadedPromise) {
+      this._loadedPromise = (async () => {
         try {
-          user.roles = JSON.parse(String(user.roles));
-        } catch {
-          user.roles = [String(user.roles)];
+          const user = await firstValueFrom(this.http.get<AppUser>(`${this.base}/user`, { withCredentials: true }));
+          console.log('Usuario cargado:', user);
+          if (!user) {
+            this.clearUser();
+            return null;
+          }
+
+          // normalizar roles
+          if (user.roles && !Array.isArray(user.roles)) {
+            try { user.roles = JSON.parse(String(user.roles)); } catch { user.roles = [String(user.roles)]; }
+          }
+
+          // inactive user -> clear and return null
+          if (user.is_active === false) {
+            this.clearUser();
+            throw new Error('Usuario inactivo');
+          }
+
+          this.setUser(user);
+          return user;
+        } catch (err) {
+          console.error('Error al cargar usuario:', err);
+          this.clearUser();
+          throw err;
         }
-      }
-
-      if (user.is_active === false) {
-        this.clearUser();
-        throw new Error('Usuario inactivo');
-      }
-
-      this.setUser(user);
-      return user;
-    } catch (err) {
-      this.clearUser();
-      throw err;
+      })();
     }
+    return this._loadedPromise;
   }
 
-  // --- Helpers ---
-  setUser(user: AppUser | null) {
+  // ---------- local helpers ----------
+  setUser(user: any | null) {
     if (user) {
       if (user.roles && !Array.isArray(user.roles)) {
-        try {
-          user.roles = JSON.parse(String(user.roles));
-        } catch {
-          user.roles = [String(user.roles)];
-        }
+        try { user.roles = JSON.parse(String(user.roles)); } catch { user.roles = [String(user.roles)]; }
       }
+      // si roles no existe, asegurarlo como array vacío
+      if (!user.roles) user.roles = [];
       localStorage.setItem('user', JSON.stringify(user));
       this._user$.next(user);
     } else {
@@ -104,8 +98,10 @@ export class AuthService {
   clearUser() {
     localStorage.removeItem('user');
     this._user$.next(null);
+    this._loadedPromise = null;
   }
 
+  // Síncronos útiles para guards/templates
   getUser(): AppUser | null {
     const raw = localStorage.getItem('user');
     if (raw) return JSON.parse(raw);
@@ -118,19 +114,12 @@ export class AuthService {
 
   isAdmin(): boolean {
     const u = this.getUser();
-    return (
-      !!u &&
-      Array.isArray(u.roles) &&
-      (u.roles as string[]).includes('administrador')
-    );
+    return !!u && Array.isArray(u.roles) && (u.roles as string[]).includes('administrador');
   }
 
-  isBasic(): boolean {
-    const u = this.getUser();
-    return (
-      !!u &&
-      Array.isArray(u.roles) &&
-      (u.roles as string[]).includes('basico')
-    );
+  // utilidad para forzar recarga inmediata (opcional)
+  async refreshUser() {
+    this._loadedPromise = null;
+    return this.loadUser();
   }
 }

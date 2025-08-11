@@ -14,7 +14,9 @@ export class AppComponent implements OnInit {
   async ngOnInit() {
     try {
       await this.auth.loadUser();
+      console.log('Usuario cargado en AppComponent');
     } catch (e) {
+      console.warn('Error en carga usuario', e);
       // no user logged — ignore, app will show login route
       console.log('No session active');
     }

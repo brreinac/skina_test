@@ -1,41 +1,66 @@
-﻿import { Component, OnInit, inject } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { ActivatedRoute, Router } from "@angular/router";
-import { UserService } from "../../services/user";
+﻿import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';  // para *ngIf, *ngFor
+import { FormsModule } from '@angular/forms';    // para [(ngModel)]
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 @Component({
-  selector: "app-user-form",
+  selector: 'app-user-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: "./form.html",
-  styleUrls: ["./form.css"]
+  templateUrl: './form.html',
+  styleUrls: ['./form.css']
 })
 export class UserFormComponent implements OnInit {
-  private route = inject(ActivatedRoute);
-  public router = inject(Router);
-  private userService = inject(UserService);
 
-  id: number | null = null;
-  username = "";
-  password = "";
-  role = "basico";
-  is_active = true;
+  user: any = {};                // <--- Aquí declaras user para enlazar el formulario
+  saving = false;               // <--- bandera para mostrar spinner y bloquear inputs
+  isProfileMode = false;        // <--- indica si estamos en modo perfil para ocultar campos
+  
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  async ngOnInit() {
-    this.id = this.route.snapshot.params['id'] ? Number(this.route.snapshot.params['id']) : null;
-    if (this.id) {
-      const u:any = await this.userService.get(this.id);
-      this.username = u.username;
-      this.role = (u.roles && u.roles[0]) ? u.roles[0] : this.role;
-      this.is_active = u.is_active ?? true;
+  ngOnInit() {
+    // Detectar si estamos en modo perfil
+    this.isProfileMode = this.router.url === '/profile';
+
+    if (this.isProfileMode) {
+      this.user = { ...this.authService.getUser() }; // copia usuario autenticado
+      delete this.user.password; // limpiar password para que el input quede vacío
     }
   }
 
   async save() {
-    const payload = { username: this.username, password: this.password || undefined, role: this.role, is_active: this.is_active };
-    if (this.id) await this.userService.update(this.id, payload);
-    else await this.userService.store(payload);
+    this.saving = true;
+
+    try {
+      if (this.isProfileMode) {
+        // Actualizar perfil usuario autenticado
+        const data = await this.http.put('/api/profile', this.user, { withCredentials: true }).toPromise();
+        // Actualizar localmente el usuario en el servicio Auth
+        this.authService.setUser(this.user);
+      } else if (this.user.id) {
+        // Editar usuario existente
+        await this.http.put(`/api/users/${this.user.id}`, this.user, { withCredentials: true }).toPromise();
+      } else {
+        // Crear nuevo usuario
+        await this.http.post('/api/users', this.user, { withCredentials: true }).toPromise();
+      }
+      alert('Guardado con éxito');
+      this.router.navigate(['/users']); // redirigir tras guardar
+    } catch (error) {
+      console.error(error);
+      alert('Error al guardar');
+    } finally {
+      this.saving = false;
+    }
+  }
+
+  cancel() {
     this.router.navigate(['/users']);
   }
 }

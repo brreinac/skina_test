@@ -3,47 +3,69 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Product;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        return Product::with('subcategories.category')->get();
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function show($id)
+    {
+        return Product::with('subcategories.category')->findOrFail($id);
+    }
+
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'is_active' => 'nullable|boolean',
+            'subcategory_ids' => 'required|array',
+            'subcategory_ids.*' => 'exists:subcategories,id',
+        ]);
+
+        $product = Product::create([
+            'name' => $request->name,
+            'is_active' => $request->is_active ?? 1,
+        ]);
+
+        $product->subcategories()->sync($request->subcategory_ids);
+
+        return response()->json($product->load('subcategories.category'), 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'is_active' => 'nullable|boolean',
+            'subcategory_ids' => 'required|array',
+            'subcategory_ids.*' => 'exists:subcategories,id',
+        ]);
+
+        $product = Product::findOrFail($id);
+
+        // Actualiza campos básicos
+        $product->update([
+            'name' => $request->name,
+            'is_active' => $request->is_active ?? 1,
+        ]);
+
+        // Actualiza relación de subcategorías
+        $product->subcategories()->sync($request->subcategory_ids);
+
+        return response()->json($product->load('subcategories.category'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy($id)
     {
-        //
-    }
+        $product = Product::findOrFail($id);
+        $product->subcategories()->detach();
+        $product->delete();
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json(['message' => 'Producto eliminado correctamente']);
     }
 }

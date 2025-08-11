@@ -10,19 +10,25 @@ class Subcategory extends Model
 {
     use LogsActivity;
 
-    protected $fillable = ['category_id', 'nombre', 'is_active', 'products_count'];
+    // Cambiamos 'nombre' por 'name'
+    protected $fillable = ['category_id', 'name', 'is_active', 'products_count'];
 
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
             ->useLogName('subcategory')
-            ->logOnly(['category_id', 'nombre', 'is_active'])
+            ->logOnly(['category_id', 'name', 'is_active'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs();
     }
 
-    public function category() { return $this->belongsTo(Category::class); }
-    public function products() { return $this->belongsToMany(Product::class, 'product_subcategory'); }
+    public function category() {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function products() {
+        return $this->belongsToMany(Product::class, 'product_subcategory');
+    }
 
     public function setActive(bool $active)
     {

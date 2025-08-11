@@ -11,13 +11,19 @@
 
 <div class="d-flex">
   <aside class="sidebar bg-white border-end">
-    <ul class="nav flex-column p-2">
-      <li class="nav-item"><a class="nav-link active" routerLink="/dashboard"><i class="bi bi-house"></i> Dashboard</a></li>
-      <li class="nav-item"><a class="nav-link" routerLink="/products"><i class="bi bi-box-seam"></i> Products</a></li>
-      <li class="nav-item"><a class="nav-link" routerLink="/categories"><i class="bi bi-tags"></i> Categories</a></li>
-      <li class="nav-item"><a class="nav-link" routerLink="/users"><i class="bi bi-people"></i> Users</a></li>
-    </ul>
-  </aside>
+  <ul class="nav flex-column p-2">
+    <li class="nav-item"><a class="nav-link active" routerLink="/dashboard"><i class="bi bi-house"></i> Dashboard</a></li>
+    <li class="nav-item"><a class="nav-link" routerLink="/products"><i class="bi bi-box-seam"></i> Products</a></li>
+    <li class="nav-item"><a class="nav-link" routerLink="/categories"><i class="bi bi-tags"></i> Categories</a></li>
+    <li class="nav-item"><a class="nav-link" routerLink="/subcategories"><i class="bi bi-subtract"></i> Sub categorias</a></li>
+
+    <!-- Si es administrador -->
+    <li *ngIf="isAdmin" class="nav-item"><a class="nav-link" routerLink="/users"><i class="bi bi-people"></i> Users</a></li>
+
+    <!-- Si es básico -->
+    <li *ngIf="isBasic" class="nav-item"><a class="nav-link" routerLink="/profile"><i class="bi bi-person"></i> Mi perfil</a></li>
+  </ul>
+</aside>
 
   <main class="flex-fill p-4 bg-light">
     <div class="container-fluid">
@@ -96,18 +102,6 @@
                 </tr>
               </tbody>
             </table>
-          </div>
-        </div>
-      </div>
-
-      <div class="row mt-3">
-        <div class="col-md-8"></div>
-        <div class="col-md-4">
-          <div class="card">
-            <div class="card-header">Traffic last 6 months</div>
-            <div class="card-body">
-              <div class="text-center text-muted">Gráfico (opcional)</div>
-            </div>
           </div>
         </div>
       </div>

@@ -1,1 +1,52 @@
-<p>list works!</p>
+<div class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h5 class="mb-0">Productos</h5>
+
+    <!-- Usamos botones que llaman a los métodos createProduct() para que se ejecute
+         la lógica de navegación definida en el componente (no routerLink directo) -->
+    <div>
+      <button class="btn btn-primary btn-sm" (click)="createProduct()">
+        <i class="bi bi-plus"></i> Crear
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div *ngIf="loading" class="text-center">
+      <div class="spinner-border" role="status"></div>
+    </div>
+
+    <table *ngIf="!loading && products.length > 0" class="table table-hover">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Categorías</th>
+          <th>Subcategorías</th>
+          <th style="width: 140px">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <!-- Usamos las propiedades que produce el map en list.ts -->
+          <td>{{ product.displayName }}</td>
+          <td>{{ product.categoriesText }}</td>
+          <td>{{ product.subcategoriesText }}</td>
+          <td>
+            <!-- Botón editar llama a la función editProduct(id) -->
+            <button class="btn btn-sm btn-warning me-2" (click)="editProduct(product.id)">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <!-- Botón eliminar ya estaba correcto -->
+            <button class="btn btn-sm btn-danger" (click)="deleteProduct(product.id)">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && products.length === 0" class="alert alert-info">
+      No hay productos registrados.
+    </div>
+  </div>
+</div>

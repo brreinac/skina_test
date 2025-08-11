@@ -2,46 +2,34 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\AuthController;
+use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\SubcategoryController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\UserController;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| These routes are loaded by the RouteServiceProvider and assigned to the
-| "api" middleware group.
-|
-*/
-
-// Auth
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
 
-// Dashboard stats (single definition, using Api namespace)
-Route::middleware(['auth:sanctum', 'check.user.active'])
-    ->get('/dashboard/stats', [\App\Http\Controllers\Api\DashboardController::class, 'stats']);
-
-// Keep a simple /user route if needed (but note there's already one above)
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-// Protected resources (categories, subcategories, products, users)
 Route::middleware(['auth:sanctum', 'check.user.active'])->group(function () {
 
-    // API resources
-    Route::apiResource('categories', \App\Http\Controllers\Api\CategoryController::class);
-    Route::apiResource('subcategories', \App\Http\Controllers\Api\SubcategoryController::class);
-    Route::apiResource('products', \App\Http\Controllers\Api\ProductController::class);
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
 
-    // Users - only admin can manage users (full CRUD)
+    Route::apiResource('categories', CategoryController::class);
+    Route::apiResource('subcategories', SubcategoryController::class);
+    Route::apiResource('products', ProductController::class);
+
+    // Admin: CRUD completo usuarios (index, show, update, delete)
     Route::middleware('role:administrador')->group(function () {
-        Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
+        Route::apiResource('users', UserController::class);
     });
 
-    // Allow basic users to update their own account (profile)
-    Route::put('profile', [\App\Http\Controllers\Api\UserController::class, 'updateProfile']);
+    // Usuarios básicos pueden ver y editar solo su propio usuario (show y update)
+    Route::get('users/{user}', [UserController::class, 'show'])->middleware('can:view,user');
+    Route::put('users/{user}', [UserController::class, 'update'])->middleware('can:update,user');
+
+    // Ruta para que cualquier usuario actualice su perfil (usuario autenticado)
+    Route::put('/profile', [UserController::class, 'updateProfile']);
 });

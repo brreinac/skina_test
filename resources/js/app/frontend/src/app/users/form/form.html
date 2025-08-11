@@ -1,1 +1,61 @@
-<p>form works!</p>
+<div class="card shadow-sm border-0">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">{{ user.id ? 'Editar Usuario' : 'Crear Usuario' }}</h5>
+  </div>
+
+  <div class="card-body">
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-bold">Usuario</label>
+        <input [(ngModel)]="user.username" name="username" class="form-control" maxlength="100"
+          [disabled]="saving" placeholder="Nombre de usuario" required />
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-bold">Nombre</label>
+        <input [(ngModel)]="user.name" name="name" class="form-control" maxlength="255"
+          [disabled]="saving" placeholder="Nombre completo" />
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-bold">Email</label>
+        <input [(ngModel)]="user.email" name="email" type="email" class="form-control"
+          [disabled]="saving" placeholder="correo@ejemplo.com" />
+      </div>
+
+      <div class="col-md-6 mb-3">
+        <label class="form-label fw-bold">{{ user.id ? 'Cambiar contraseña (opcional)' : 'Contraseña' }}</label>
+        <input [(ngModel)]="user.password" name="password" type="password" class="form-control"
+          [disabled]="saving" placeholder="{{ user.id ? 'Dejar en blanco para mantener' : 'Ingrese una contraseña' }}" />
+      </div>
+
+      <!-- SOLO PARA ADMIN: muestra solo si NO es perfil propio -->
+      <div *ngIf="!isProfileMode" class="col-md-6 mb-3">
+        <label class="form-label fw-bold">Rol</label>
+        <select class="form-select" [(ngModel)]="user.role" name="role" [disabled]="saving" required>
+          <option [ngValue]="'administrador'">Administrador</option>
+          <option [ngValue]="'basico'">Básico</option>
+        </select>
+      </div>
+
+      <!-- SOLO PARA ADMIN: muestra solo si NO es perfil propio -->
+      <div *ngIf="!isProfileMode" class="col-md-6 mb-3 d-flex align-items-center">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="is_active" [(ngModel)]="user.is_active" name="is_active" />
+          <label class="form-check-label" for="is_active">Activo</label>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-success" (click)="save()" [disabled]="saving || !user.username?.trim()">
+        <span *ngIf="saving" class="spinner-border spinner-border-sm me-1"></span>
+        Guardar
+      </button>
+
+      <button class="btn btn-secondary ms-2" type="button" (click)="cancel()" [disabled]="saving">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>

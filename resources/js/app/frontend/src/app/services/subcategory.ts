@@ -1,3 +1,4 @@
+// src/app/services/subcategory.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -9,22 +10,22 @@ export class SubcategoryService {
   constructor(private http: HttpClient) {}
 
   list() {
-    return firstValueFrom(this.http.get(this.base, { withCredentials: true }));
+    return firstValueFrom(this.http.get<any[]>(this.base, { withCredentials: true }));
   }
 
-  get(id: number) {
-    return firstValueFrom(this.http.get(`${this.base}/${id}`, { withCredentials: true }));
+  get(id: number | string) {
+    return firstValueFrom(this.http.get<any>(`${this.base}/${id}`, { withCredentials: true }));
   }
 
-  store(data: any) {
-    return firstValueFrom(this.http.post(this.base, data, { withCredentials: true }));
+  store(payload: any) {
+    return firstValueFrom(this.http.post<any>(this.base, payload, { withCredentials: true }));
   }
 
-  update(id: number, data: any) {
-    return firstValueFrom(this.http.put(`${this.base}/${id}`, data, { withCredentials: true }));
+  update(id: number | string, payload: any) {
+    return firstValueFrom(this.http.put<any>(`${this.base}/${id}`, payload, { withCredentials: true }));
   }
 
-  delete(id: number) {
-    return firstValueFrom(this.http.delete(`${this.base}/${id}`, { withCredentials: true }));
+  delete(id: number | string) {
+    return firstValueFrom(this.http.delete<any>(`${this.base}/${id}`, { withCredentials: true }));
   }
 }
